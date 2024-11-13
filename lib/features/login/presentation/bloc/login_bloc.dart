@@ -1,33 +1,80 @@
-import 'package:bloc/bloc.dart';
-import 'package:flutter/material.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:formz/formz.dart';
 import 'package:simple_login/features/login/data/datasources/dio_service.dart';
-import 'package:simple_login/features/login/domain/entities/user_entitie.dart';
+import 'package:simple_login/features/login/data/models/password.dart';
+import 'package:simple_login/features/login/data/models/username.dart';
+import 'package:simple_login/features/login/domain/repositories/authentication_repository.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final DioService dio;
+  final AuthenticationRepository _authenticationRepository;
 
-  LoginBloc({required this.dio}) : super(LoginInitial()) {
-    on<LoginFecthEvent>(onLoginFecthEvent);
+  LoginBloc(
+    this.dio, {
+    required AuthenticationRepository authenticationRepository,
+  })  : _authenticationRepository = authenticationRepository,
+        super(const LoginState()) {
+    on<LoginUsernameChanged>(_onUsernameChanged);
+    on<LoginPasswordChanged>(_onPasswordChanged);
+    on<LoginSubmitted>(_onSubmitted);
   }
-}
 
-Future<void> onLoginFecthEvent(
-    LoginFecthEvent event, Emitter<LoginState> emit) async {
-  emit(LoginLoading());
+  void _onUsernameChanged(
+    LoginUsernameChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    final username = Username.dirty(event.username);
+    emit(
+      state.copyWith(
+        username: username,
+        isValid: Formz.validate([state.password, username]),
+      ),
+    );
+  }
 
-  try {
-    final dio = DioService();
-    final response = await dio.validatePassword(event.password);
-    if (response.password != event.password) {
-      final user = UserEntitie(id: response.id, response.password);
-      emit(LoginSucess(user: user));
-    } else {
-      emit(LoginFail(errorMessage: 'Password invalid'));
+  void _onPasswordChanged(
+    LoginPasswordChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    final password = Password.dirty(event.password);
+    emit(
+      state.copyWith(
+        password: password,
+        isValid: Formz.validate([password, state.username]),
+      ),
+    );
+  }
+
+  Future<void> _onSubmitted(
+    LoginSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
+    if (state.isValid) {
+      emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
+
+      try {
+        final passwordError = state.password.validator(state.password.value);
+
+        if (passwordError != null) {
+          emit(state.copyWith(status: FormzSubmissionStatus.failure));
+          return;
+        }
+
+        final isPasswordValid = await _authenticationRepository.logIn(
+          password: state.password.value,
+        );
+        if (isPasswordValid) {
+          emit(state.copyWith(status: FormzSubmissionStatus.success));
+        } else {
+          emit(state.copyWith(status: FormzSubmissionStatus.failure));
+        }
+      } catch (_) {
+        emit(state.copyWith(status: FormzSubmissionStatus.failure));
+      }
     }
-  } catch (e) {
-    emit(LoginFail(errorMessage: 'Error: $e'));
   }
 }

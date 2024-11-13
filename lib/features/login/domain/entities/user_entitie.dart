@@ -1,8 +1,5 @@
 class UserEntitie {
-  UserEntitie(this.password, {
-    required this.id,
-  });
+  UserEntitie(this.password, );
 
-  final String id;
   final String password;
 }

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:simple_login/features/login/data/datasources/dio_service.dart';
+import 'package:simple_login/features/login/domain/repositories/authentication_repository.dart';
+import 'package:simple_login/features/login/presentation/bloc/login_bloc.dart';
+import 'package:simple_login/features/login/presentation/pages/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -6,34 +11,29 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Simple Login',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    final dio = DioService();
+    final authenticationRepository = AuthenticationRepository(dio: dio);
+
+    return BlocProvider(
+      create: (_) => LoginBloc(
+        dio,
+        authenticationRepository: authenticationRepository
       ),
-      home: const MyHomePage(title: 'Home Page'),
+      child: const MyAppView(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class MyAppView extends StatelessWidget {
+  const MyAppView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Hello World!! 🤟'),
-      ),
+    return const MaterialApp(
+      home: LoginPage(),
     );
   }
 }

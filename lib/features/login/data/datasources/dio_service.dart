@@ -24,11 +24,11 @@ class DioService {
     }
   }
 
-  Future<UserEntitie> validatePassword(String password) async {
+  Future<UserEntitie> validatePassword(String password, Dio dio) async {
     final response = await dio.post('/validate', data: {'password': password});
 
-    if (response.statusCode == 202) {
-      return response.data['message'];
+    if (response.statusCode == 200) {
+      return response.data['password'];
     } else {
       throw Exception('Password invalid.');
     }
