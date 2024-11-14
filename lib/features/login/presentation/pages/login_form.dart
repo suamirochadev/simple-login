@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:simple_login/features/login/presentation/bloc/login_bloc.dart';
+import 'package:simple_login/features/login/presentation/pages/success_page.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key});
@@ -10,12 +11,9 @@ class LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
-        if (state.status.isFailure) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(content: Text('Authentication Failure')),
-            );
+        if (state is LoginSucess) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => SuccessPage(message: state.message)));
         }
       },
       child: Align(
@@ -69,6 +67,7 @@ class _PasswordInput extends StatelessWidget {
       obscureText: true,
       decoration: InputDecoration(
         labelText: 'password',
+        helperText: 'At least 8 characters includin one letter and number',
         errorText: displayError != null ? 'invalid password' : null,
       ),
     );

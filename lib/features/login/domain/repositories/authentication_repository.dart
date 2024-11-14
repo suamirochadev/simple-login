@@ -5,16 +5,22 @@ class AuthenticationRepository {
 
   AuthenticationRepository({required this.dio});
 
-  Future<bool> logIn({required String password, dio}) async {
+  Future<String> logIn({required String password}) async {
     try {
-      final response = await dio.validatePassword(password);
-      if (response['password'] == password) {
-        return true;
+      final isValid = await validatePassword(password);
+      if (isValid == 'valid') {
+        return 'its ok';
       } else {
-        return false;
+        return 'its not ok';
       }
     } catch (e) {
-      return false;
+      throw Exception('Error authentication: $e');
     }
+  }
+
+  Future<String> validatePassword(String password) async {
+  
+      final user = await dio.validatePassword(password);
+      return user.message; 
   }
 }
