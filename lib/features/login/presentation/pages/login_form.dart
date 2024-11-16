@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:simple_login/features/login/presentation/bloc/login_bloc.dart';
 import 'package:simple_login/features/login/presentation/pages/success_page.dart';
+import 'package:simple_login/features/login/presentation/widgets/password_input.dart';
+import 'package:simple_login/features/login/presentation/widgets/username_input.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key});
@@ -21,54 +23,13 @@ class LoginForm extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _UsernameInput(),
+            const UsernameInput(),
             const Padding(padding: EdgeInsets.all(12)),
-            _PasswordInput(),
+            const PasswordInput(),
             const Padding(padding: EdgeInsets.all(12)),
             _LoginButton(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _UsernameInput extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final displayError = context.select(
-      (LoginBloc bloc) => bloc.state.username.displayError,
-    );
-
-    return TextField(
-      key: const Key('loginForm_usernameInput_textField'),
-      onChanged: (username) {
-        context.read<LoginBloc>().add(LoginUsernameChanged(username));
-      },
-      decoration: InputDecoration(
-          labelText: 'username',
-          errorText: displayError != null ? 'invalid username' : null),
-    );
-  }
-}
-
-class _PasswordInput extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final displayError = context.select(
-      (LoginBloc bloc) => bloc.state.password.displayError,
-    );
-
-    return TextField(
-      key: const Key('loginForm_passwordInput_textfield'),
-      onChanged: (password) {
-        context.read<LoginBloc>().add(LoginPasswordChanged(password));
-      },
-      obscureText: true,
-      decoration: InputDecoration(
-        labelText: 'password',
-        helperText: 'At least 8 characters includin one letter and number',
-        errorText: displayError != null ? 'invalid password' : null,
       ),
     );
   }

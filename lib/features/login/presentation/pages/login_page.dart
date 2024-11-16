@@ -20,7 +20,8 @@ class LoginPage extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text(''),
+          centerTitle: true,
+          title: const Text('Simple Login by suamirochadev'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16),
